@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["SunWen <sunzhongshan1988@gmail.com>"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = ">=3.9.0,<3.11"
+opencv-python = "^4.8.1.78"
+matplotlib = "^3.8.1"
+stable-retro = { platform = "linux", version = "^0.9.2" }
+fastapi = "^0.109.2"
+uvicorn = "^0.27.1"
+typing-extensions = "^4.9.0"
+uvloop = "^0.19.0"
+
+[tool.poetry.scripts]
+dev = "main:dev"
+start = "main:start"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
