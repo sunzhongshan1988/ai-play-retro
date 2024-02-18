@@ -1,5 +1,5 @@
 import asyncio
-from models.api import GameRequest
+from models.api import PlayRetroRequest, StopRetroRequest
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import config
@@ -7,8 +7,6 @@ import uvicorn
 import os
 from starlette.websockets import WebSocketDisconnect
 
-from ais.kane import kane
-from ais.abel import abel
 from services.retro_manager import retro_manager
 
 app = FastAPI()
@@ -47,7 +45,7 @@ async def read_platform(platform: str):
     return {"games": games}
 
 @app.post("/play")
-async def play_game(request: GameRequest):
+async def play_game(request: PlayRetroRequest):
     game = config.retro_config[request.platform]['games'][request.game]['name']
     if not game:
         return {"status": "error" ,"msg": "Invalid game"}
@@ -60,7 +58,7 @@ async def play_game(request: GameRequest):
     return {"status": "success"}
 
 @app.post("/stop")
-async def stop_game(request: GameRequest):
+async def stop_game(request: StopRetroRequest):
     if request.ai not in ["kane", "abel"]:
         return {"status": "error" ,"msg": "Invalid AI"}
     

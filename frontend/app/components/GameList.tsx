@@ -14,6 +14,10 @@ const fetcher = (url: string) => fetch(url).then(res => res.json());
 const GameList: React.FC<GameListProps> = ({ platform }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
+  const [currentGame, setCurrentGame] = React.useState<string | null>(null);
+  const [kaneRunning, setKaneRunning] = React.useState<boolean>(false);
+  const [abelRunning, setAbelRunning] = React.useState<boolean>(false);
+
   const { data, error, isLoading } = useSWR<{ games: Game[] }>(`http://localhost:8000/games?platform=${platform}`, fetcher);
 
   if (error) return <div>Load Error</div>;
@@ -38,18 +42,56 @@ const GameList: React.FC<GameListProps> = ({ platform }) => {
       }
 
       messageApi.success('Run game success');
+      setKaneRunning(ai === 'kane');
+      setAbelRunning(ai === 'abel');
 
     } catch (error) {
       messageApi.error('Run game failed');
     }
   }
 
+  const stopGame = async (ai: string) => {
+    try {
+      const response = await fetch('http://localhost:8000/stop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ai,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      messageApi.success('Stop game success');
+
+      ai === 'kane' && setKaneRunning(false);
+      ai === 'abel' && setAbelRunning(false);
+
+    } catch (error) {
+      messageApi.error('Stop game failed');
+    }
+  }
+
   const clickKane = async (game: string) => {
-    await playGame(game, 'kane');
+    if (kaneRunning) {
+      await stopGame('kane');
+    } else {
+      await playGame(game, 'kane');
+      setCurrentGame(game);
+    }
   }
 
   const clickAbel = async (game: string) => {
-    await playGame(game, 'abel');
+    if (abelRunning) {
+      await stopGame('abel');
+    } else {
+      await playGame(game, 'abel');
+      setCurrentGame(game);
+    }
   }
 
   return (
@@ -62,8 +104,12 @@ const GameList: React.FC<GameListProps> = ({ platform }) => {
         <List.Item
           key={item.key}
           actions={[
-            <Button key="kane" onClick={() => clickKane(item.key)}>Kane</Button>,
-            <Button key="abel" onClick={() => clickAbel(item.key)}>Abel</Button>
+            <Button key="kane" onClick={() => clickKane(item.key)}>
+              {kaneRunning ? 'Stop Kane' : 'Run Kane'}
+            </Button>,
+            <Button key="abel" onClick={() => clickAbel(item.key)}>
+              {abelRunning ? 'Stop Abel' : 'Run Abel'}
+            </Button>
           ]}
         >
           <List.Item.Meta
