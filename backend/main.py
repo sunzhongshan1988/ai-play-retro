@@ -9,6 +9,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from ais.kane import kane
 from ais.abel import abel
+from services.retro_manager import retro_manager
 
 app = FastAPI()
 
@@ -49,15 +50,21 @@ async def read_platform(platform: str):
 async def play_game(request: GameRequest):
     game = config.retro_config[request.platform]['games'][request.game]['name']
     if not game:
-        return {"error": "Invalid game"}
+        return {"status": "error" ,"msg": "Invalid game"}
     
     if request.ai not in ["kane", "abel"]:
-        return {"error": "Invalid AI"}
+        return {"status": "error" ,"msg": "Invalid AI"}
+    
+    retro_manager.start_retro(request.ai, game, global_ws)
 
-    if request.ai == "kane":
-        asyncio.create_task(kane.run(game, global_ws))
-    if request.ai == "abel":
-        asyncio.create_task(abel.run(game, global_ws))
+    return {"status": "success"}
+
+@app.post("/stop")
+async def stop_game(request: GameRequest):
+    if request.ai not in ["kane", "abel"]:
+        return {"status": "error" ,"msg": "Invalid AI"}
+    
+    retro_manager.stop_retro(request.ai)
 
     return {"status": "success"}
 

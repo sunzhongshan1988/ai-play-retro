@@ -9,59 +9,70 @@ from starlette.websockets import WebSocketDisconnect
 from ais.kane.actions import Actions
 from ais.kane.vision import write_image
 
-async def run(game: str, global_ws: WebSocket):
-    acts = Actions()
+class Kane:
+    def __init__(self, game, ws):
+        self.game = game
+        self.ws = ws
+        self.env = None
+        self.running = False
 
-    # Create the environment
-    env = retro.make(game=game, obs_type=retro.Observations.IMAGE)
+    async def run(self):
+        acts = Actions()
 
-    # Reset the environment
-    obs = env.reset()
+        # Create the environment
+        self.env = retro.make(game=self.game, obs_type=retro.Observations.IMAGE)
 
-    # Run the game loop
-    while True:
-        # Render the game
-        env.render()
+        # Reset the environment
+        self.env.reset()
+        self.running = True
 
-        #print("Observation space:", env.observation_space)
-        #print("Action space:", env.action_space)
+        # Run the game loop
+        while self.running:
+            # Render the game on the screen
+            self.env.render()
 
-        # Select a random action
-        action = env.action_space.sample()
+            #print("Observation space:", env.observation_space)
+            #print("Action space:", env.action_space)
 
-        #action = acts.get_action('shot')
+            # Select a random action
+            action = self.env.action_space.sample()
 
-        # Perform the action
-        obs, reward, done, _, info = env.step(action)
-        
-        if global_ws:
-            # Convert the observation to a BGR image
-            obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
-            # Encode the image as a PNG
-            _, buffer = cv2.imencode('.png', obs_bgr)
-            # Convert the image to a base64 string
-            img_base64 = base64.b64encode(buffer).decode("utf-8")
-            # Send the image to the client
-            try:
-                await global_ws.send_json({"type": "image", "data": img_base64, "ai": "kane"})
-            except WebSocketDisconnect:
+            #action = acts.get_action('shot')
+
+            # Perform the action
+            obs, reward, done, _, info =self.env.step(action)
+            
+            if self.ws:
+                # Convert the observation to a BGR image
+                obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
+                # Encode the image as a PNG
+                _, buffer = cv2.imencode('.png', obs_bgr)
+                # Convert the image to a base64 string
+                img_base64 = base64.b64encode(buffer).decode("utf-8")
+                # Send the image to the client
+                try:
+                    await self.ws.send_json({"type": "image", "data": img_base64, "ai": "kane"})
+                except WebSocketDisconnect:
+                    break
+            else:
                 break
-        else:
-            break
 
-        # Save the observation image
-        # write_image(obs, f'{i}.png')
+            # Save the observation image
+            # write_image(obs, f'{i}.png')
 
-        # time.sleep(0.1)
+            # time.sleep(0.1)
 
-        # If the game is over, reset the environment
-        if done:
-            obs = env.reset()
+            # If the game is over, reset the environment
+            if done:
+                obs = self.env.reset()
 
-    # Close the environment
-    env.close()
-    if global_ws:
-        try:
-            await global_ws.send_json({"type": "status", "ai": "kane", "status": "done"})
-        except WebSocketDisconnect:
-            pass
+        # Close the environment
+        self.env.close()
+        if self.ws:
+            try:
+                await self.ws.send_json({"type": "status", "ai": "kane", "status": "done"})
+            except WebSocketDisconnect:
+                pass
+    
+    def stop(self):
+        self.running = False
