@@ -116,6 +116,7 @@ export default function Home() {
               alt="Kane"
               width={200}
               height={200}
+              fallback='retro_game.png'
             />
             <Text>Kane</Text>
           </div>
@@ -125,6 +126,7 @@ export default function Home() {
               alt="Abel"
               width={200}
               height={200}
+              fallback='retro_game.png'
             />
             <Text className="text-center">Abel</Text>
           </div>
