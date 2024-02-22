@@ -14,7 +14,6 @@ const fetcher = (url: string) => fetch(url).then(res => res.json());
 const GameList: React.FC<GameListProps> = ({ platform }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [currentGame, setCurrentGame] = React.useState<string | null>(null);
   const [kaneRunning, setKaneRunning] = React.useState<boolean>(false);
   const [abelRunning, setAbelRunning] = React.useState<boolean>(false);
 
@@ -42,8 +41,12 @@ const GameList: React.FC<GameListProps> = ({ platform }) => {
       }
 
       messageApi.success('Run game success');
-      setKaneRunning(ai === 'kane');
-      setAbelRunning(ai === 'abel');
+      if (ai === 'kane') {
+        setKaneRunning(true);
+      }
+      if (ai === 'abel') {
+        setAbelRunning(true);
+      }
 
     } catch (error) {
       messageApi.error('Run game failed');
@@ -81,7 +84,6 @@ const GameList: React.FC<GameListProps> = ({ platform }) => {
       await stopGame('kane');
     } else {
       await playGame(game, 'kane');
-      setCurrentGame(game);
     }
   }
 
@@ -90,7 +92,6 @@ const GameList: React.FC<GameListProps> = ({ platform }) => {
       await stopGame('abel');
     } else {
       await playGame(game, 'abel');
-      setCurrentGame(game);
     }
   }
 

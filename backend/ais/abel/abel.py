@@ -1,67 +1,39 @@
-import time
-from fastapi import WebSocket
+import multiprocessing
+from multiprocessing import Queue
 import retro
-import random
 import cv2
 import base64
-from starlette.websockets import WebSocketDisconnect
+import random
 
-from ais.kane.actions import Actions
-from ais.kane.vision import write_image
+class Abel:
+    def __init__(self, game, queue: Queue):
+        self.game = game
+        self.queue = queue
+        self.env = None
+        self.running = False
 
-async def run(game: str, global_ws: WebSocket):
-    acts = Actions()
+    # 改为同步方法
+    def run(self):
+        self.env = retro.make(game=self.game, obs_type=retro.Observations.IMAGE)
+        self.env.reset()
+        self.running = True
 
-    # Create the environment
-    env = retro.make(game=game, obs_type=retro.Observations.IMAGE)
+        while self.running:
+            self.env.render()
+            action = self.env.action_space.sample()
+            obs, reward, done, _, info = self.env.step(action)
 
-    # Reset the environment
-    obs = env.reset()
-
-    # Run the game loop
-    while True:
-        # Render the game
-        env.render()
-
-        #print("Observation space:", env.observation_space)
-        #print("Action space:", env.action_space)
-
-        # Select a random action
-        action = env.action_space.sample()
-
-        #action = acts.get_action('shot')
-
-        # Perform the action
-        obs, reward, done, _, info = env.step(action)
-        
-        if global_ws:
-            # Convert the observation to a BGR image
+            # 处理游戏帧并放入队列
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
-            # Encode the image as a PNG
             _, buffer = cv2.imencode('.png', obs_bgr)
-            # Convert the image to a base64 string
             img_base64 = base64.b64encode(buffer).decode("utf-8")
-            # Send the image to the client
-            try:
-                await global_ws.send_json({"type": "image", "data": img_base64, "ai": "abel"})
-            except WebSocketDisconnect:
-                break
-        else:
-            break
+            self.queue.put({"type": "image", "data": img_base64, "ai": "abel"})
 
-        # Save the observation image
-        # write_image(obs, f'{i}.png')
+            if done:
+                obs = self.env.reset()
 
-        # time.sleep(0.1)
+        self.env.close()
+        self.queue.put({"type": "status", "ai": "kane", "status": "done"})
 
-        # If the game is over, reset the environment
-        if done:
-            obs = env.reset()
-
-    # Close the environment
-    env.close()
-    if global_ws:
-        try:
-            await global_ws.send_json({"type": "status", "ai": "abel", "status": "done"})
-        except WebSocketDisconnect:
-            pass
+    def stop(self):
+        self.running = False
