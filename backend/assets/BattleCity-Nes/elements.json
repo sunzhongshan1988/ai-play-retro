@@ -1,0 +1,30 @@
+{
+    "road": {
+        "type": "RGB",
+        "value": [0, 0, 0]
+    },
+    "brick": {
+        "type": "RGB",
+        "value": [153, 68, 41]
+    },
+    "steel": {
+        "type": "RGB",
+        "value": [175, 179, 175]
+    },
+    "water": {
+        "type": "RGB",
+        "value": []
+    },
+    "bush": {
+        "type": "RGB",
+        "value": []
+    },
+    "ice": {
+        "type": "RGB",
+        "value": []
+    },
+    "basic_tank": {
+        "type": "image",
+        "value": "./basic_tank.png"
+    }
+}

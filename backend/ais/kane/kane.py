@@ -1,18 +1,23 @@
-import multiprocessing
 from multiprocessing import Queue
 import retro
 import cv2
 import base64
-import random
 
 class Kane:
-    def __init__(self, game, queue: Queue):
+    """
+    About Kane agent is a script-based AI agent that uses the retro environment to play games.
+    """
+    def __init__(self, game: str, queue: Queue):
+        """Initialize Kane
+        Args:
+            game (str): The name of the game
+            queue (Queue): A multiprocessing queue to communicate with the main process
+        """
         self.game = game
         self.queue = queue
         self.env = None
         self.running = False
 
-    # 改为同步方法
     def run(self):
         self.env = retro.make(game=self.game, obs_type=retro.Observations.IMAGE)
         self.env.reset()
@@ -23,7 +28,7 @@ class Kane:
             action = self.env.action_space.sample()
             obs, reward, done, _, info = self.env.step(action)
 
-            # 处理游戏帧并放入队列
+            # Convert to base64 and send to queue
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
             _, buffer = cv2.imencode('.png', obs_bgr)
             img_base64 = base64.b64encode(buffer).decode("utf-8")
