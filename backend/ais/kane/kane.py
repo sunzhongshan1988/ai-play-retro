@@ -3,6 +3,8 @@ import retro
 import cv2
 import base64
 
+from ais.kane.worker_factory import Worker_Factory
+
 class Kane:
     """
     About Kane agent is a script-based AI agent that uses the retro environment to play games.
@@ -17,6 +19,7 @@ class Kane:
         self.queue = queue
         self.env = None
         self.running = False
+        self.worker = Worker_Factory.get_worker(game)
 
     def run(self):
         self.env = retro.make(game=self.game, obs_type=retro.Observations.IMAGE)
@@ -25,7 +28,9 @@ class Kane:
 
         while self.running:
             self.env.render()
-            action = self.env.action_space.sample()
+
+            action = self.worker.get_action()
+
             obs, reward, done, _, info = self.env.step(action)
 
             # Convert to base64 and send to queue

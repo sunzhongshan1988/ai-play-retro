@@ -22,12 +22,12 @@ elements = {
         "size": [4, 4]
     },
     "steel": {
-        "preperty": "variable",
+        "preperty": "obstructive",
         "rgb": [175, 179, 175],
         "size": [8, 8]
     },
     "water": {
-        "preperty": "variable",
+        "preperty": "obstructive",
         "rgb": [],
         "size": [16, 16]
     },
@@ -42,7 +42,7 @@ elements = {
         "size": [16, 16]
     },
     "basic_tank": {
-        "preperty": "destroyable",
+        "preperty": "killable",
         "image": "./basic_tank.png",
         "size": [16, 16]
     },
@@ -52,3 +52,10 @@ elements = {
         "size": [16, 16]
     }
 }
+
+def get_passable_elements():
+    passable_elements = []
+    for element in elements:
+        if elements[element]["preperty"] == "passable":
+            passable_elements.append(element)
+    return passable_elements
