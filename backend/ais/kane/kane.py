@@ -33,6 +33,8 @@ class Kane:
 
             obs, reward, done, _, info = self.env.step(action)
 
+            self.worker.vision(obs)
+
             # Convert to base64 and send to queue
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
             _, buffer = cv2.imencode('.png', obs_bgr)

@@ -1,3 +1,4 @@
+import numpy as np
 from ais.kane.worker.battlecity_nes import BattleCityNesWorker
 
 class Worker_Factory:
