@@ -5,15 +5,14 @@ protected: cannot be attacked
 destroyable: can be destroyed
 
 """
-elements = {
+import os
+
+current_dir = os.path.dirname(__file__)
+
+rgb_elements = {
     "road": {
         "preperty": "passable",
         "rgb": [0, 0, 0],
-        "size": [16, 16]
-    },
-    "eagle": {
-        "preperty": "protected",
-        "position": [96, 192],
         "size": [16, 16]
     },
     "brick": {
@@ -40,22 +39,33 @@ elements = {
         "preperty": "passable",
         "rgb": [],
         "size": [16, 16]
-    },
-    "basic_tank": {
-        "preperty": "killable",
-        "image": "./basic_tank.png",
-        "size": [16, 16]
-    },
-    "player1_tank": {
+    }
+}
+
+fixed_elements = {
+    "eagle": {
         "preperty": "protected",
-        "image": "./player1_tank.png",
+        "fixed": [96, 192],
         "size": [16, 16]
     }
 }
 
-def get_passable_elements():
-    passable_elements = []
-    for element in elements:
-        if elements[element]["preperty"] == "passable":
-            passable_elements.append(element)
-    return passable_elements
+
+images_elements = {
+    "basic_tank": {
+        "preperty": "killable",
+        "image": os.path.join(current_dir, "basic_tank.png"),
+        "size": [16, 16]
+    },
+    "player1_tank": {
+        "preperty": "protected",
+        "image": os.path.join(current_dir, "player1_tank.png"),
+        "size": [16, 16]
+    }
+}
+
+elements = {
+    "rgb": rgb_elements,
+    "fixed": fixed_elements,
+    "images": images_elements
+}
