@@ -1,4 +1,5 @@
 from multiprocessing import Queue
+import time
 import retro
 import cv2
 import base64
@@ -29,17 +30,21 @@ class Kane:
         while self.running:
             self.env.render()
 
+            # Get the action from the worker
             action = self.worker.get_action()
 
             obs, reward, done, _, info = self.env.step(action)
 
-            self.worker.vision(obs)
+            # Worker vision process to transform the frame into the spatial hash table
+            self.worker.vision(obs) 
 
             # Convert to base64 and send to queue
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
             _, buffer = cv2.imencode('.png', obs_bgr)
             img_base64 = base64.b64encode(buffer).decode("utf-8")
             self.queue.put({"type": "image", "data": img_base64, "ai": "kane"})
+
+            time.sleep(0.5)
 
             if done:
                 obs = self.env.reset()
