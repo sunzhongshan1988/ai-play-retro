@@ -44,7 +44,7 @@ class Kane:
             img_base64 = base64.b64encode(buffer).decode("utf-8")
             self.queue.put({"type": "image", "data": img_base64, "ai": "kane"})
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
             if done:
                 obs = self.env.reset()

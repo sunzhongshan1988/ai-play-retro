@@ -2,6 +2,7 @@ import numpy as np
 from vision.spatial_hash_table import SpatialHashTable
 from vision.frame_process import FrameProcess
 from .BattleCity_Nes.elements import elements
+from .BattleCity_Nes.actions import Actions
 
 
 class BattleCityNesWorker:
@@ -17,6 +18,7 @@ class BattleCityNesWorker:
         # Create a spatial hash table to store the vision of the game, for battle city, the game area is 208x208, and each cell is 8x8
         self.hash_table = SpatialHashTable(208, 208, 4)
         self.frame_process = FrameProcess(208, 208, 4)
+        self.action = Actions()
 
 
     def get_action(self) -> list[int]:
@@ -30,9 +32,9 @@ class BattleCityNesWorker:
             list[int]: A list of 8 integers, each integer represents an action of the game.
         """
 
-        self.hash_table.print_elements_positions(["player1_tank", "basic_tank"])
-        
-        return [0, 0, 0, 0, 1, 0, 0, 0, 0]
+        # self.hash_table.print_elements_positions(["player1_tank", "basic_tank"])
+        action = self.action.get_action(["UP", "FIRE"])
+        return action
     
     def vision(self, frame: np.ndarray) -> None:
         """Get the vision of the game.
