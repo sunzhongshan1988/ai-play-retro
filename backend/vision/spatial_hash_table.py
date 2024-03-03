@@ -71,6 +71,13 @@ class SpatialHashTable:
                 if self.table[row][col] is not None:
                     objects.add(self.table[row][col])
         return objects
+    
+    def clear(self):
+        """Clear the spatial hash table.
+        Returns:
+            None
+        """
+        self.table = [[None for _ in range(self.columns)] for _ in range(self.rows)]
 
     def remove(self, x, y, width, height):
         """Remove the object from the covering bucket.
@@ -93,7 +100,9 @@ class SpatialHashTable:
         Returns:
             None
         """
+        found_elements = []
         for row in range(self.rows):
             for col in range(self.columns):
                 if self.table[row][col] in elements:
-                    print(f"({row}, {col}): {self.table[row][col]}")
+                    found_elements.append((self.table[row][col], row, col))
+        print(found_elements)

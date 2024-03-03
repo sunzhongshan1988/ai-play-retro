@@ -22,7 +22,7 @@ class FrameProcess:
         self.height = height
         self.block_size = block_size
 
-    def get_elements_position(self, frame: np.ndarray, elements: dict) -> list[tuple]:
+    def get_elements_position(self, frame: np.ndarray, elements: dict, image_threshold = 0.6) -> list[tuple]:
         """Process the frame.
         Args:
             frame (np.ndarray):  A numpy array of the frame image(RGB).
@@ -60,13 +60,15 @@ class FrameProcess:
             template = cv2.cvtColor(template, cv2.COLOR_BGR2RGB)
 
             # Find the position of the element in the frame
-            position = cv2.matchTemplate(frame, template, cv2.TM_CCOEFF_NORMED)
+            result = cv2.matchTemplate(frame, template, cv2.TM_CCOEFF_NORMED)
+
 
             # Get the position of the element
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(position)
+            yloc, xloc = np.where(result >= image_threshold)
 
             # Add the position of the element to the list
-            elements_position.append((element, max_loc[0], max_loc[1]))
+            for (x, y) in zip(xloc, yloc):
+                elements_position.append((element, x, y))
 
         return elements_position
 

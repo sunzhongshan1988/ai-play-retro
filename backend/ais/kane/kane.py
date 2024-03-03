@@ -36,7 +36,7 @@ class Kane:
             obs, reward, done, _, info = self.env.step(action)
 
             # Worker vision process to transform the frame into the spatial hash table
-            self.worker.vision(obs) 
+            self.worker.path_planning(obs) 
 
             # Convert to base64 and send to queue
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
@@ -44,7 +44,7 @@ class Kane:
             img_base64 = base64.b64encode(buffer).decode("utf-8")
             self.queue.put({"type": "image", "data": img_base64, "ai": "kane"})
 
-            time.sleep(0.1)
+            # time.sleep(0.1)
 
             if done:
                 obs = self.env.reset()
