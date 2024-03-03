@@ -44,7 +44,7 @@ class Kane:
             # time.sleep(0.1)
 
             if done:
-                obs = self.env.reset()
+                obs = self.env.reset()[0]
 
         self.env.close()
         self.queue.put({"type": "status", "ai": "kane", "status": "done"})

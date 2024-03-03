@@ -1,8 +1,11 @@
 from multiprocessing import Queue
+import os
 import time
 import retro
 import cv2
 import base64
+import torch
+from ais.abel.tansformer_agent import TransformerAgent
 
 class Abel:
     """
@@ -20,16 +23,40 @@ class Abel:
         self.running = False
 
     def run(self):
-        self.env = retro.make(game=self.game, obs_type=retro.Observations.IMAGE)
+        self.env = retro.make(game=self.game, obs_type=retro.Observations.RAM)
         obs = self.env.reset()[0]
         self.running = True
+
+        input_dim = 10240  # Assuming 128-dimensional input from the RAM
+        hidden_dim = 256
+        output_dim = self.env.action_space.n  # Number of possible actions
+        num_layers = 3
+        nhead = 4
+
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        filename = 'model_weights.pth'
+        file_path = os.path.join(current_dir, filename)
+        model = TransformerAgent(input_dim, hidden_dim, output_dim, num_layers, nhead)
+        model.load_state_dict(torch.load(file_path))
+        model.eval()  # Set the model to evaluation mode
+        model = model.to('cuda' if torch.cuda.is_available() else 'cpu')  # Move model to GPU if available
+
 
         while self.running:
             self.env.render()
 
-            action = self.env.action_space.sample()
+            obs = torch.tensor(obs, dtype=torch.float32).unsqueeze(0)  # Convert observation to tensor and add batch dimension
+            obs = obs.to('cuda' if torch.cuda.is_available() else 'cpu')  # Move obs to GPU if available
 
-            obs, reward, done, _, info = self.env.step(action)
+            with torch.no_grad():  # 不计算梯度
+                action_probs = model(obs)
+            action = torch.argmax(action_probs, dim=1).item()  # 选择概率最高的动作
+
+            # 转换动作格式以匹配环境期望
+            action_list = [0] * 9
+            action_list[action] = 1
+
+            obs, reward, done, _, info = self.env.step(action_list)
 
             # Convert to base64 and send to queue
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
@@ -40,7 +67,7 @@ class Abel:
             # time.sleep(0.1)
 
             if done:
-                obs = self.env.reset()
+                obs = self.env.reset()[0]
 
         self.env.close()
         self.queue.put({"type": "status", "ai": "abel", "status": "done"})

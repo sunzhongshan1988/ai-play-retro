@@ -105,7 +105,7 @@ def train(model, env, optimizer, loss_fn, episodes=1000, gamma=0.99):
 
         print(f'Episode {episode+1}, Total Reward: {total_reward}')
 
-train(model, env, optimizer, loss_fn, episodes=10000, gamma=0.99)
+train(model, env, optimizer, loss_fn, episodes=10, gamma=0.99)
 
 
 # 获取当前文件的目录
