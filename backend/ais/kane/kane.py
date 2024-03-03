@@ -24,19 +24,16 @@ class Kane:
 
     def run(self):
         self.env = retro.make(game=self.game, obs_type=retro.Observations.IMAGE)
-        self.env.reset()
+        obs = self.env.reset()[0]
         self.running = True
 
         while self.running:
             self.env.render()
 
             # Get the action from the worker
-            action = self.worker.get_action()
+            action = self.worker.get_action(obs)
 
             obs, reward, done, _, info = self.env.step(action)
-
-            # Worker vision process to transform the frame into the spatial hash table
-            self.worker.path_planning(obs) 
 
             # Convert to base64 and send to queue
             obs_bgr = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)

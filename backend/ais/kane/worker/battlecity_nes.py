@@ -20,7 +20,7 @@ class BattleCityNesWorker:
         self.path = []
         self.directions = []
 
-    def get_action(self) -> list[int]:
+    def get_action(self, frame: np.ndarray) -> list[int]:
         """Get the action of the game.
         "buttons": ["B", null, "SELECT", "START", "UP", "DOWN", "LEFT", "RIGHT", "A"].
 
@@ -32,7 +32,8 @@ class BattleCityNesWorker:
         """
 
         if len(self.directions) == 0:
-            self.path_to_directions()
+            self._path_planning(frame)
+            self._path_to_directions()
         
         if len(self.directions) > 0:
             action = self.action.get_action([self.directions.pop(0), "FIRE"])
@@ -40,7 +41,7 @@ class BattleCityNesWorker:
         else:
             return self.action.get_action(["FIRE"])
     
-    def path_planning(self, frame: np.ndarray) -> None:
+    def _path_planning(self, frame: np.ndarray) -> None:
         """Get the vision of the game.
 
         Args:
@@ -85,7 +86,7 @@ class BattleCityNesWorker:
         # 输出路径
         self.path = path
 
-    def path_to_directions(self):
+    def _path_to_directions(self):
         """
         Converts a list of path coordinates into tank movement directions.
 
