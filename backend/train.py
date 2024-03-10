@@ -23,7 +23,7 @@ game = sys.argv[1]
 env = retro.make(game=game, obs_type=retro.Observations.RAM)
 input_dim = 10240  # Assuming 10240-dimensional input from the RAM
 hidden_dim = 256
-output_dim = 5  # Number of possible actions
+output_dim = env.action_space.n  # Number of possible actions
 num_layers = 3
 nhead = 4
 
@@ -54,7 +54,7 @@ def train(model, env, optimizer, loss_fn, episodes=2, gamma=0.99):
             # Convert action to the format expected by the environment
             action_index = action.item()
             action_list = [0] * 9
-            action_list[action_index+4] = 1
+            action_list[action_index] = 1
 
             obs, reward, done, _, info= env.step(action_list)  #  Execute the action in the environment
 

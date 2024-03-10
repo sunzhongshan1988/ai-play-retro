@@ -29,7 +29,7 @@ class Abel:
 
         input_dim = 10240  # Assuming 128-dimensional input from the RAM
         hidden_dim = 256
-        output_dim = 5  # Number of possible actions
+        output_dim = self.env.action_space.n  # Number of possible actions
         num_layers = 3
         nhead = 4
 
@@ -60,7 +60,7 @@ class Abel:
 
             #  Convert action to the format expected by the environment
             action_list = [0] * 9
-            action_list[action+4] = 1
+            action_list[action] = 1
 
             obs, reward, done, _, info = self.env.step(action_list)
 
