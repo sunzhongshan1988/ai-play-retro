@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 
@@ -18,4 +19,6 @@ class TransformerAgent(nn.Module):
         src = src.unsqueeze(1)  # Add batch dimension
         output = self.transformer_encoder(src)
         output = self.fc2(output.squeeze(1))
-        return output
+        action_probs = torch.softmax(output, dim=-1)  # 应用softmax来获得概率分布
+
+        return action_probs

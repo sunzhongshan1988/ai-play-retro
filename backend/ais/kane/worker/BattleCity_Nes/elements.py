@@ -10,12 +10,6 @@ import os
 current_dir = os.path.dirname(__file__)
 
 rgb_elements = [
-    {   
-        "name": "road",
-        "preperty": "passable",
-        "rgb": [0, 0, 0],
-        "size": [16, 16]
-    },
     {
         "name": "brick",
         "preperty": "destroyable",

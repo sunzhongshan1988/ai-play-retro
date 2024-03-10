@@ -1,31 +1,11 @@
+from ais.abel.tansformer_agent import TransformerAgent
+
 import sys
 import os
 import retro
 import torch
 import torch.optim as optim
 import torch.nn as nn
-from torch.nn import TransformerEncoder, TransformerEncoderLayer
-
-class TransformerAgent(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, nhead):
-        super(TransformerAgent, self).__init__()
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-        self.output_dim = output_dim
-        
-        self.encoder_layer = TransformerEncoderLayer(d_model=self.hidden_dim, nhead=nhead)
-        self.transformer_encoder = TransformerEncoder(self.encoder_layer, num_layers=num_layers)
-        self.fc1 = nn.Linear(self.input_dim, self.hidden_dim)
-        self.fc2 = nn.Linear(self.hidden_dim, self.output_dim)
-
-    def forward(self, src):
-        src = self.fc1(src)
-        src = src.unsqueeze(1)  # Add batch dimension
-        output = self.transformer_encoder(src)
-        output = self.fc2(output.squeeze(1))
-        action_probs = torch.softmax(output, dim=-1)  # 应用softmax来获得概率分布
-
-        return action_probs
 
 if len(sys.argv) < 2:
     print('Usage: python train.py <YourGameName>')
@@ -39,7 +19,8 @@ else:
     print("CUDA is not available. Training on CPU.")
 
 # 初始化环境
-env = retro.make(game=sys.argv[1], obs_type=retro.Observations.RAM)  # 替换'YourGameName'为实际游戏名
+game = sys.argv[1]
+env = retro.make(game=game, obs_type=retro.Observations.RAM)  # 替换'YourGameName'为实际游戏名
 input_dim = 10240  # Assuming 128-dimensional input from the RAM
 hidden_dim = 256
 output_dim = env.action_space.n  # Number of possible actions
@@ -51,7 +32,7 @@ model = TransformerAgent(input_dim, hidden_dim, output_dim, num_layers, nhead)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 loss_fn = nn.CrossEntropyLoss()
 
-def train(model, env, optimizer, loss_fn, episodes=1000, gamma=0.99):
+def train(model, env, optimizer, loss_fn, episodes=2, gamma=0.99):
     for episode in range(episodes):
         obs = env.reset()[0]
         done = False
@@ -105,13 +86,13 @@ def train(model, env, optimizer, loss_fn, episodes=1000, gamma=0.99):
 
         print(f'Episode {episode+1}, Total Reward: {total_reward}')
 
-train(model, env, optimizer, loss_fn, episodes=10, gamma=0.99)
+train(model, env, optimizer, loss_fn, episodes=1, gamma=0.99)
 
 
 # 获取当前文件的目录
 current_dir = os.path.dirname(os.path.realpath(__file__))
-filename = 'model_weights.pth'
-save_path = os.path.join(current_dir, filename)
+filename = f'{game}.pth'
+save_path = os.path.join("ais/abel/model", filename)
 
 # 保存模型参数
 torch.save(model.state_dict(), save_path)

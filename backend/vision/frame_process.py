@@ -22,7 +22,7 @@ class FrameProcess:
         self.height = height
         self.block_size = block_size
 
-    def get_elements_position(self, frame: np.ndarray, elements: dict, image_threshold = 0.6) -> list[tuple]:
+    def get_elements_position(self, frame: np.ndarray, elements: dict, image_threshold = 0.8) -> list[tuple]:
         """Process the frame.
         Args:
             frame (np.ndarray):  A numpy array of the frame image(RGB).
@@ -46,11 +46,11 @@ class FrameProcess:
                 # Check if the average color is similar to the color of the elements
                 for element in elements["rgb"]:
                     if is_color_similar(average_color, element['rgb'], 10):
-                        elements_position.append((element, x, y))
+                        elements_position.append((element, x//16, y//16))
 
         # Fiexed elements
         for element in elements["fixed"]:
-            elements_position.append((element, element["fixed"][0], element["fixed"][1]))
+            elements_position.append((element, element["fixed"][0]//16, element["fixed"][1]//16))
         
         # Find the position of the image elements in the frame
         for element in elements["images"]:
@@ -68,7 +68,7 @@ class FrameProcess:
 
             # Add the position of the element to the list
             for (x, y) in zip(xloc, yloc):
-                elements_position.append((element, x, y))
+                elements_position.append((element, x//16, y//16))
 
         return elements_position
 

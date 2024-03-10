@@ -33,9 +33,15 @@ class Abel:
         num_layers = 3
         nhead = 4
 
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        filename = 'model_weights.pth'
-        file_path = os.path.join(current_dir, filename)
+        filename = f'{self.game}.pth'
+        file_path = os.path.join("ais/abel/model", filename)
+
+        # Check if model file exists
+        if not os.path.exists(file_path):
+            print(f"Model file {file_path} does not exist. Exiting.")
+            self.queue.put({"type": "status", "ai": "abel", "status": "error"})
+            return
+
         model = TransformerAgent(input_dim, hidden_dim, output_dim, num_layers, nhead)
         model.load_state_dict(torch.load(file_path))
         model.eval()  # Set the model to evaluation mode
