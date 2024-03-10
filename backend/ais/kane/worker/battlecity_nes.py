@@ -65,26 +65,24 @@ class BattleCityNesWorker:
             return
         
         player1_position = player1_positions[0]
-        print("player1_position: ", player1_position)
+        #print("player1_position: ", player1_position)
 
-        # 找到最近的 basic_tank
+        # Find the nearest enemy tank
         nearest_tank = self._find_nearest_enemy_tank(player1_position, enmy_tanks)
-        print("nearest_tank: ", nearest_tank)
+        #print("nearest_tank: ", nearest_tank)
 
         if nearest_tank is None:
             print("No enemy tanks found for path planning.")
             return
 
-        # 初始化 AStarGraph 对象
+        # Create a graph for A* search
         astar_graph = AStarGraph(width=208//16, height=208//16, obstacles=obstacles)
 
-        # 进行 A* 搜索
-        start = (int(player1_position[0]), int(player1_position[1]))  # 起点
-        goal = (int(nearest_tank[0]), int(nearest_tank[1]))  # 终点
+        # Execute A* search
+        start = (int(player1_position[0]), int(player1_position[1]))  # Start point
+        goal = (int(nearest_tank[0]), int(nearest_tank[1]))  # End point
         path = astar_graph.a_star_search(start, goal)
 
-        # 输出路径
-        print("Path: ", path)
         self.path = path
 
     def _path_to_directions(self):
@@ -101,11 +99,11 @@ class BattleCityNesWorker:
             current_position = self.path[i]
             next_position = self.path[i + 1]
             
-            # 计算坐标差异
+            # Calculate the difference between the current position and the next position
             dx = next_position[0] - current_position[0]
             dy = next_position[1] - current_position[1]
             
-            # 确定方向
+            # Add the direction to the list
             if dx > 0:
                 self.directions.append('RIGHT')
             elif dx < 0:
@@ -121,7 +119,7 @@ class BattleCityNesWorker:
         nearest_tank = None
         min_distance = float('inf')
         for tank in enemy_tanks:
-            # 跳过与玩家位置一样的坦克
+            # Skip the player's position, because we don't want to consider it as an enemy tank
             if player_position == (tank[0], tank[1]):
                 continue
             distance = ((player_position[0] - tank[0]) ** 2 + (player_position[1] - tank[1]) ** 2) ** 0.5

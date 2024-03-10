@@ -6,6 +6,12 @@ class AStarGraph:
     A* search graph for path finding.
     """
     def __init__(self, width, height, obstacles):
+        """Initialize the A* search graph.
+        Args:
+            width (int): The width of the graph.
+            height (int): The height of the graph.
+            obstacles (list[tuple]): A list of obstacles.
+        """
         self.nodes = [[Node(x, y) for y in range(height)] for x in range(width)]
         self.width = width
         self.height = height
@@ -18,13 +24,13 @@ class AStarGraph:
                 if (x, y) in self.obstacles:
                     self.nodes[x][y].is_obstacle = True
                     continue
-                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # 4方向邻居
+                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # For 4 directions (up, down, left, right)
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < self.width and 0 <= ny < self.height and not self.nodes[nx][ny].is_obstacle:
                         self.nodes[x][y].add_neighbor(self.nodes[nx][ny])
 
     def heuristic(self, node, goal):
-        # 使用曼哈顿距离作为启发式函数
+        # Use Manhattan distance as the heuristic
         return abs(node.x - goal.x) + abs(node.y - goal.y)
 
     def a_star_search(self, start, goal):
@@ -49,7 +55,7 @@ class AStarGraph:
                 return self.reconstruct_path(goal_node)
 
             for neighbor in current_node.neighbors:
-                tentative_g = current_node.g + 1  # 假设每步移动成本为1
+                tentative_g = current_node.g + 1  # Assuming the cost between two nodes is 1
 
                 if tentative_g < neighbor.g:
                     neighbor.parent = current_node
@@ -68,5 +74,5 @@ class AStarGraph:
         while current:
             path.append((current.x, current.y))
             current = current.parent
-        path.reverse()  # 因为我们从终点回溯到起点，所以需要反转路径
+        path.reverse()  # Reverse the path to get the correct order
         return path
